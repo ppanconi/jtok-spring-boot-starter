@@ -10,6 +10,7 @@ import org.springframework.lang.Nullable;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.Map;
 
 @Entity
 @Table(name = "Domain_Events")
@@ -38,11 +39,19 @@ public class DomainEvent implements Serializable {
     @Nullable
     int topicPartition;
 
-    @Column(nullable = true)
+    @Column(nullable = true, length = 1024)
     @Nullable
     String eventData;
 
     @Column(nullable = false)
-    @NonNull
+    @Nullable
     long eventTsMils;
+
+    @Column(nullable = true)
+    @Nullable
+    Long offSet;
+
+    @Transient
+    @Nullable
+    Map<String, Object> applicationPayload;
 }

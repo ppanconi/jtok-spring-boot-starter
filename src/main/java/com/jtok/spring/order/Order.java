@@ -39,8 +39,6 @@ public class Order {
     @Nullable
     String notes;
 
-
-
     /**
      * Clears all domain events currently held. Usually invoked by the infrastructure in place in Spring Data
      * repositories.
@@ -61,17 +59,15 @@ public class Order {
 
             DomainEvent event = new DomainEvent(
                     this.getGlobalId(),
-                    DomainEventType.ORDER_CREATED,
-                    System.currentTimeMillis());
+                    DomainEventType.ORDER_CREATED);
 
-            event.setEventData(JSONObject.toJSONString(
-                    new HashMap<String, Object>() {{
+            event.setApplicationPayload(new HashMap<String, Object>() {{
                         put("globalId", obj.getGlobalId());
                         put("customer", obj.getCustomer());
                         put("currency", obj.getCurrency().getCurrencyCode());
                         put("granTotal", obj.getGranTotal());
                     }}
-            ));
+            );
 
             return Collections.singletonList(event);
         } else {

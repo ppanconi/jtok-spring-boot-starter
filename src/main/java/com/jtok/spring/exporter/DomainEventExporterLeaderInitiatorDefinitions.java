@@ -1,4 +1,4 @@
-package com.jtok.spring.domainevent;
+package com.jtok.spring.exporter;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,6 +8,9 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.boot.context.properties.bind.BindResult;
+import org.springframework.boot.context.properties.bind.Binder;
+import org.springframework.core.env.Environment;
 import org.springframework.integration.context.IntegrationContextUtils;
 import org.springframework.integration.support.SmartLifecycleRoleController;
 import org.springframework.integration.zookeeper.config.LeaderInitiatorFactoryBean;
@@ -29,9 +32,15 @@ public class DomainEventExporterLeaderInitiatorDefinitions implements
 
     private Map<String, String> rolesToExporterNames = new HashMap<>();
 
-    public DomainEventExporterLeaderInitiatorDefinitions(int domainEventsPartitionNumber, String domainName) {
-        this.domainEventsPartitionNumber = domainEventsPartitionNumber;
-        this.domainName = domainName;
+    public DomainEventExporterLeaderInitiatorDefinitions(Environment environment) {
+//        this.domainEventsPartitionNumber = domainEventsPartitionNumber;
+//        this.domainName = domainName;
+        BindResult<DomainConfigs> result = Binder.get(environment)
+                .bind("domain", DomainConfigs.class);
+        DomainConfigs properties = result.get();
+
+        this.domainEventsPartitionNumber = properties.getPartitions();
+        this.domainName = properties.getName();
     }
 
     @Override
@@ -60,7 +69,7 @@ public class DomainEventExporterLeaderInitiatorDefinitions implements
                         .addPropertyValue("role", role)
                         .addPropertyReference("groupMember", "groupMember")
                         .addPropertyValue("totalNumberOfPartitions", this.domainEventsPartitionNumber)
-                        .addAutowiredProperty("repository");
+                        .addAutowiredProperty("exporter");
 
             ((DefaultListableBeanFactory) beanFactory).
                     registerBeanDefinition(exporterName, taskBuilder.getBeanDefinition());

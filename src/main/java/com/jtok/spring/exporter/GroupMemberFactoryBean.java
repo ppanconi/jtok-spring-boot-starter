@@ -1,4 +1,4 @@
-package com.jtok.spring.domainevent;
+package com.jtok.spring.exporter;
 
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.recipes.nodes.GroupMember;
