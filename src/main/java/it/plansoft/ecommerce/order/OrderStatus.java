@@ -1,4 +1,4 @@
-package com.jtok.spring.order;
+package it.plansoft.ecommerce.order;
 
 public enum OrderStatus {
 

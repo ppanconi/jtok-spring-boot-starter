@@ -1,4 +1,4 @@
-package com.jtok.spring.order;
+package it.plansoft.ecommerce.order;
 
 import org.springframework.data.rest.core.annotation.HandleBeforeCreate;
 import org.springframework.data.rest.core.annotation.RepositoryEventHandler;

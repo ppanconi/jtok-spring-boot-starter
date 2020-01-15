@@ -1,12 +1,10 @@
-package com.jtok.spring.order;
+package it.plansoft.ecommerce.order;
 
 import com.jtok.spring.domainevent.DomainEvent;
 import com.jtok.spring.domainevent.DomainEventType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import net.minidev.json.JSONObject;
-import org.springframework.data.domain.AbstractAggregateRoot;
 import org.springframework.data.domain.AfterDomainEventPublication;
 import org.springframework.data.domain.DomainEvents;
 import org.springframework.lang.Nullable;

@@ -1,4 +1,4 @@
-package com.jtok.spring.order;
+package it.plansoft.ecommerce.order;
 
 import org.springframework.data.repository.CrudRepository;
 

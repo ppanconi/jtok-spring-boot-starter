@@ -1,16 +1,23 @@
 package com.jtok.spring.exporter;
 
+import com.jtok.spring.domainevent.DomainEventProcessor;
+import com.jtok.spring.domainevent.DomainEventRepository;
+import lombok.Builder;
 import org.apache.curator.framework.CuratorFramework;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.integration.zookeeper.config.CuratorFrameworkFactoryBean;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 import java.util.UUID;
 
 @Configuration
 @EnableConfigurationProperties(DomainConfigs.class)
+@EnableScheduling
 public class DomainEventExporterConfiguration {
 
     //TODO move in configuration file
@@ -31,4 +38,15 @@ public class DomainEventExporterConfiguration {
         return new GroupMemberFactoryBean(client, "/domains/" + domainConfigs.getName(), UUID.randomUUID().toString());
     }
 
+    @Bean
+    @Autowired
+    public DomainEventExporter domainEventExporter(DomainEventRepository repository, KafkaTemplate<String, String> kafkaTemplate) {
+        return new DomainEventExporterKafka(repository, kafkaTemplate);
+    }
+
+    @Bean
+    @Autowired
+    DomainEventProcessor domainEventProcessor(DomainEventRepository repository) {
+        return new DomainEventProcessor(repository);
+    }
 }
