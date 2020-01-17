@@ -1,4 +1,4 @@
-package com.jtok.spring.exporter;
+package com.jtok.spring.publisher;
 
 import org.springframework.context.annotation.Import;
 
@@ -9,6 +9,6 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-@Import(DomainEventExporterConfiguration.class)
-public @interface EnableDomainEventExporter {
+@Import(DomainEventPublisherConfiguration.class)
+public @interface EnableDomainEventPublisher {
 }

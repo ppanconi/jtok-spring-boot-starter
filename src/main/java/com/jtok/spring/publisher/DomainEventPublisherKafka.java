@@ -1,8 +1,7 @@
-package com.jtok.spring.exporter;
+package com.jtok.spring.publisher;
 
 import com.jtok.spring.domainevent.DomainEvent;
 import com.jtok.spring.domainevent.DomainEventRepository;
-import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,14 +18,14 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 @Service
-public class DomainEventExporterKafka implements DomainEventExporter {
+public class DomainEventPublisherKafka implements DomainEventPublisher {
 
-    private static final Logger log = LoggerFactory.getLogger(DomainEventExporterKafka.class);
+    private static final Logger log = LoggerFactory.getLogger(DomainEventPublisherKafka.class);
 
     private DomainEventRepository repository;
     private KafkaTemplate<String, String> kafkaTemplate;
 
-    public DomainEventExporterKafka(DomainEventRepository repository, KafkaTemplate<String, String> kafkaTemplate) {
+    public DomainEventPublisherKafka(DomainEventRepository repository, KafkaTemplate<String, String> kafkaTemplate) {
         this.repository = repository;
         this.kafkaTemplate = kafkaTemplate;
     }
@@ -43,7 +42,7 @@ public class DomainEventExporterKafka implements DomainEventExporter {
         events.forEach(event -> {
 
             ListenableFuture<SendResult<String, String>> listenableFuture = kafkaTemplate.send(
-                    domainName + "." + event.getEventType().getTopic(),
+                    domainName + "." + event.getEventType().topic(),
                     event.getTopicPartition(),
                     event.getEventTsMils(),
                     event.getKey(),

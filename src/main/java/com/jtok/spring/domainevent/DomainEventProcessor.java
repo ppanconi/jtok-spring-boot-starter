@@ -30,7 +30,7 @@ public class DomainEventProcessor {
     @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
     public void handleDomainEvent(DomainEvent event) {
 
-        int topicPartition = Utils.toPositive(Utils.murmur2(event.getKey().getBytes())) % event.getEventType().topicPartitions;
+        int topicPartition = Utils.toPositive(Utils.murmur2(event.getKey().getBytes())) % event.getEventType().topicPartitions();
         int domainPartition = topicPartition % domainPartitions;
         String eventId = UUID.randomUUID().toString();
 

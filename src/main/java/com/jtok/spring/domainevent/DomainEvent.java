@@ -1,10 +1,6 @@
 package com.jtok.spring.domainevent;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
-import lombok.NonNull;
+import lombok.*;
 
 import org.springframework.lang.Nullable;
 
@@ -18,6 +14,7 @@ import java.util.Map;
 @AllArgsConstructor
 @RequiredArgsConstructor
 @NoArgsConstructor
+@Builder
 public class DomainEvent implements Serializable {
 
     @Id
@@ -27,9 +24,30 @@ public class DomainEvent implements Serializable {
     @NonNull
     String key;
 
-    @Column(nullable = false)
     @NonNull
+    @Transient
     DomainEventType eventType;
+
+    @Column(nullable = false)
+    @Access(AccessType.PROPERTY)
+    public String getDomainEvent() {
+        if (getEventType() == null) {
+            return null;
+        }
+        return "" + getEventType().getClass().getName() + "@" + getEventType().name();
+    }
+
+    public void setDomainEvent(String str) {
+        String[] parts = str.split("@");
+
+        try {
+            Class clz = Class.forName(parts[0]);
+            Object e = Enum.valueOf(clz, parts[1]);
+            setEventType( (DomainEventType)e);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     @Column(nullable = false)
     @Nullable
@@ -54,4 +72,5 @@ public class DomainEvent implements Serializable {
     @Transient
     @Nullable
     Map<String, Object> applicationPayload;
+
 }

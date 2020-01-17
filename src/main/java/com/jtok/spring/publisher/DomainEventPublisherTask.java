@@ -1,4 +1,4 @@
-package com.jtok.spring.exporter;
+package com.jtok.spring.publisher;
 
 import org.apache.curator.framework.recipes.nodes.GroupMember;
 import org.slf4j.Logger;
@@ -10,12 +10,12 @@ import org.springframework.integration.leader.event.OnGrantedEvent;
 import org.springframework.integration.leader.event.OnRevokedEvent;
 import org.springframework.scheduling.annotation.Scheduled;
 
-public class DomainEventExporterTask implements SmartLifecycle {
+public class DomainEventPublisherTask implements SmartLifecycle {
 
-    private static final Logger log = LoggerFactory.getLogger(DomainEventExporterTask.class);
+    private static final Logger log = LoggerFactory.getLogger(DomainEventPublisherTask.class);
 
     private GroupMember groupMember;
-    private DomainEventExporter exporter;
+    private DomainEventPublisher exporter;
     private int partition;
     private String role;
     private int totalNumberOfPartitions;
@@ -33,7 +33,7 @@ public class DomainEventExporterTask implements SmartLifecycle {
         this.role = role;
     }
 
-    public void setExporter(DomainEventExporter exporter) {
+    public void setExporter(DomainEventPublisher exporter) {
         this.exporter = exporter;
     }
 

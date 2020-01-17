@@ -1,4 +1,4 @@
-package com.jtok.spring.exporter;
+package com.jtok.spring.publisher;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,22 +19,20 @@ import org.springframework.lang.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 
-public class DomainEventExporterLeaderInitiatorDefinitions implements
+public class DomainEventPublisherLeaderInitiatorDefinitions implements
 //        BeanDefinitionRegistryPostProcessor
         BeanFactoryPostProcessor,
         BeanPostProcessor
 {
 
-    private static final Logger log = LoggerFactory.getLogger(DomainEventExporterLeaderInitiatorDefinitions.class);
+    private static final Logger log = LoggerFactory.getLogger(DomainEventPublisherLeaderInitiatorDefinitions.class);
 
     private int domainEventsPartitionNumber;
     private String domainName;
 
     private Map<String, String> rolesToExporterNames = new HashMap<>();
 
-    public DomainEventExporterLeaderInitiatorDefinitions(Environment environment) {
-//        this.domainEventsPartitionNumber = domainEventsPartitionNumber;
-//        this.domainName = domainName;
+    public DomainEventPublisherLeaderInitiatorDefinitions(Environment environment) {
         BindResult<DomainConfigs> result = Binder.get(environment)
                 .bind("domain", DomainConfigs.class);
         DomainConfigs properties = result.get();
@@ -64,7 +62,7 @@ public class DomainEventExporterLeaderInitiatorDefinitions implements
                             initiatorBuilder.getBeanDefinition());
 
             BeanDefinitionBuilder taskBuilder =
-                    BeanDefinitionBuilder.rootBeanDefinition(DomainEventExporterTask.class)
+                    BeanDefinitionBuilder.rootBeanDefinition(DomainEventPublisherTask.class)
                         .addPropertyValue("partition", i)
                         .addPropertyValue("role", role)
                         .addPropertyReference("groupMember", "groupMember")

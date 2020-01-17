@@ -1,23 +1,11 @@
 package com.jtok.spring.domainevent;
 
-public enum DomainEventType {
+public interface DomainEventType {
 
+    String name();
 
-    ORDER_CREATED("order_created", 5);
+    int topicPartitions();
 
-    String topic;
-    int topicPartitions;
+    String topic();
 
-    public String getTopic() {
-        return topic;
-    }
-
-    public int getTopicPartitions() {
-        return topicPartitions;
-    }
-
-    DomainEventType(String topic, int topicPartitions) {
-        this.topic = topic;
-        this.topicPartitions = topicPartitions;
-    }
 }

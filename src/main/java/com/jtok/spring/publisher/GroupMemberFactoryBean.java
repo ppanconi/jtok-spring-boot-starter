@@ -1,4 +1,4 @@
-package com.jtok.spring.exporter;
+package com.jtok.spring.publisher;
 
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.recipes.nodes.GroupMember;

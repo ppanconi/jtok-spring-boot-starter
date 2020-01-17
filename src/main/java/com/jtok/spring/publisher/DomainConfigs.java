@@ -1,10 +1,7 @@
-package com.jtok.spring.exporter;
+package com.jtok.spring.publisher;
 
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
 
 @ConfigurationProperties(prefix = "domain")
 public class DomainConfigs {
