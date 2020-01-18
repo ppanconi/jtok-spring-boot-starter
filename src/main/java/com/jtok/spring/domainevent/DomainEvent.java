@@ -50,19 +50,15 @@ public class DomainEvent implements Serializable {
     }
 
     @Column(nullable = false)
-    @Nullable
     int domainPartition;
 
     @Column(nullable = false)
-    @Nullable
     int topicPartition;
 
     @Column(nullable = true, length = 1024)
-    @Nullable
     String eventData;
 
     @Column(nullable = false)
-    @Nullable
     long eventTsMils;
 
     @Column(nullable = true)

@@ -3,7 +3,7 @@ package com.jtok.spring.publisher;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-@ConfigurationProperties(prefix = "domain")
+@ConfigurationProperties(prefix = "jtok.domain")
 public class DomainConfigs {
     private int partitions;
     private String name;

@@ -21,10 +21,10 @@ public class DomainEventProcessor {
         this.repository = repository;
     }
 
-    @Value("${domain.partitions}")
+    @Value("${jtok.domain.partitions}")
     int domainPartitions;
 
-    @Value("${domain.name}")
+    @Value("${jtok.domain.name}")
     String domainName;
 
     @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)

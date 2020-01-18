@@ -34,7 +34,7 @@ public class DomainEventPublisherLeaderInitiatorDefinitions implements
 
     public DomainEventPublisherLeaderInitiatorDefinitions(Environment environment) {
         BindResult<DomainConfigs> result = Binder.get(environment)
-                .bind("domain", DomainConfigs.class);
+                .bind("jtok.domain", DomainConfigs.class);
         DomainConfigs properties = result.get();
 
         this.domainEventsPartitionNumber = properties.getPartitions();

@@ -30,7 +30,7 @@ public class DomainEventPublisherKafka implements DomainEventPublisher {
         this.kafkaTemplate = kafkaTemplate;
     }
 
-    @Value("${domain.name}")
+    @Value("${jtok.domain.name}")
     String domainName;
 
     @Transactional

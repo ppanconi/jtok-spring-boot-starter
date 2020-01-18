@@ -4,6 +4,7 @@ import com.jtok.spring.domainevent.DomainEventProcessor;
 import com.jtok.spring.domainevent.DomainEventRepository;
 import org.apache.curator.framework.CuratorFramework;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -23,12 +24,12 @@ import java.util.UUID;
 @EnableJpaRepositories({"com.jtok.spring.domainevent"})
 public class DomainEventPublisherConfiguration {
 
-    //TODO move in configuration file
-    public static final String ZOOKEEPER_QUORUM = "localhost:2183,localhost:2182,localhost:2181";
+//    public static final String ZOOKEEPER_QUORUM = "localhost:2183,localhost:2182,localhost:2181";
 
     @Bean(name = "curatorClient")
-    public CuratorFrameworkFactoryBean curatorFrameworkFactory() {
-        return new CuratorFrameworkFactoryBean(DomainEventPublisherConfiguration.ZOOKEEPER_QUORUM);
+    public CuratorFrameworkFactoryBean curatorFrameworkFactory(Environment environment) {
+        String zookeeperQuorum = environment.getProperty("jtok.pub.zookeeperQuorum");
+        return new CuratorFrameworkFactoryBean(zookeeperQuorum);
     }
 
     @Bean
