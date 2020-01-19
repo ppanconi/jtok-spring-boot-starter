@@ -24,8 +24,6 @@ import java.util.UUID;
 @EnableJpaRepositories({"com.jtok.spring.domainevent"})
 public class DomainEventPublisherConfiguration {
 
-//    public static final String ZOOKEEPER_QUORUM = "localhost:2183,localhost:2182,localhost:2181";
-
     @Bean(name = "curatorClient")
     public CuratorFrameworkFactoryBean curatorFrameworkFactory(Environment environment) {
         String zookeeperQuorum = environment.getProperty("jtok.pub.zookeeperQuorum");

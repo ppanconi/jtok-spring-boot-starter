@@ -5,6 +5,10 @@ import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.context.annotation.Bean;
@@ -26,34 +30,35 @@ import java.util.Map;
 @EnableKafka
 public class SubscriberKafkaConfiguration implements ApplicationEventPublisherAware {
 
+    private static final Logger log = LoggerFactory.getLogger(SubscriberKafkaConfiguration.class);
+
     private ApplicationEventPublisher applicationEventPublisher;
 
+    @Value("${jtok.domain.name}")
+    String domainName;
+
     @Bean
-    KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, String>> kafkaListenerContainerFactory() {
+    KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, String>>
+        kafkaListenerContainerFactory(ConsumerFactory<String, String> consumerFactory) {
+
+        log.info("Kafka Consumer configs " + consumerFactory.getConfigurationProperties());
+
+        Map<String, Object> props = new HashMap<>(consumerFactory.getConfigurationProperties());
+        props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, domainName);
+
+        ConsumerFactory<String, String> myConsumerFactory = new DefaultKafkaConsumerFactory<>(props,
+                new StringDeserializer(), new StringDeserializer());
 
         ConcurrentKafkaListenerContainerFactory<String, String> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();
-        factory.setConsumerFactory(consumerFactory());
+        factory.setConsumerFactory(myConsumerFactory);
         factory.setConcurrency(3);
         factory.getContainerProperties().setPollTimeout(3000);
         factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL_IMMEDIATE);
+        factory.getContainerProperties().setGroupId(domainName);
 
         return factory;
-    }
-
-    @Bean
-    public ConsumerFactory<String, String> consumerFactory() {
-        return new DefaultKafkaConsumerFactory<>(consumerConfigs(),
-                new StringDeserializer(), new StringDeserializer());
-    }
-
-    @Bean
-    public Map<String, Object> consumerConfigs() {
-        Map<String, Object> props = new HashMap<>();
-        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092,localhost:9093,localhost:9094");
-        props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
-        props.put(ConsumerConfig.GROUP_ID_CONFIG, "payments");
-        return props;
     }
 
     @Override
