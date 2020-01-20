@@ -2,12 +2,11 @@ package com.jtok.spring.publisher;
 
 import com.jtok.spring.domainevent.DomainEvent;
 import com.jtok.spring.domainevent.DomainEventRepository;
+import com.jtok.spring.domainevent.DomainEventTopicInfo;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.context.event.EventListener;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
@@ -17,11 +16,12 @@ import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 
 import javax.annotation.PostConstruct;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+
+import static java.lang.Math.max;
+import static java.lang.Math.min;
 
 @Service
 public class DomainEventPublisherKafka implements DomainEventPublisher {
@@ -52,7 +52,7 @@ public class DomainEventPublisherKafka implements DomainEventPublisher {
         events.forEach(event -> {
 
             ListenableFuture<SendResult<String, String>> listenableFuture = kafkaTemplate.send(
-                    domainName + "." + event.getEventType().topic(),
+                    event.getTopic(),
                     event.getTopicPartition(),
                     event.getEventTsMils(),
                     event.getKey(),
@@ -99,16 +99,24 @@ public class DomainEventPublisherKafka implements DomainEventPublisher {
 
             DomainConfigs domainConfigs = context.getBean(DomainConfigs.class);
 
-            typesProviders.provideDomainEventTypes().forEach(domainEventType -> {
-                String topicName = domainConfigs.getName() + "." + domainEventType.topic();
+            Map<String, DomainEventTopicInfo> topicInfos = new HashMap<>();
 
+            typesProviders.provideDomainEventTypes().forEach(domainEventType -> {
+                String topicName = domainConfigs.getName() + "." + domainEventType.topic().topicName();
+                topicInfos.put(topicName, domainEventType.topic());
+            });
+
+
+            topicInfos.forEach((topicName, domainEventTopicInfo) -> {
+                short ss = (short) min(max(domainEventTopicInfo.topicReplications(), Short.MIN_VALUE), Short.MAX_VALUE);
                 context.registerBean(topicName, NewTopic.class, () -> new NewTopic(
                                 topicName,
-                                Optional.of(domainEventType.topicPartitions()),
-                                Optional.empty()
+                                Optional.of(domainEventTopicInfo.topicPartitions()),
+                                Optional.of(ss)
                         )
                 );
             });
+
         } else {
             log.warn("it was not possible to get a DomainEventTypesProvider in application context " +
                     "no automatic topic configuration provided");

@@ -11,10 +11,7 @@ import java.util.Map;
 @Entity
 @Table(name = "Domain_Events")
 @Data
-@AllArgsConstructor
-@RequiredArgsConstructor
 @NoArgsConstructor
-@Builder
 public class DomainEvent implements Serializable {
 
     @Id
@@ -24,33 +21,14 @@ public class DomainEvent implements Serializable {
     @NonNull
     String key;
 
-    @NonNull
-    @Transient
-    DomainEventType eventType;
-
     @Column(nullable = false)
-    @Access(AccessType.PROPERTY)
-    public String getDomainEvent() {
-        if (getEventType() == null) {
-            return null;
-        }
-        return "" + getEventType().getClass().getName() + "@" + getEventType().name();
-    }
-
-    public void setDomainEvent(String str) {
-        String[] parts = str.split("@");
-
-        try {
-            Class clz = Class.forName(parts[0]);
-            Object e = Enum.valueOf(clz, parts[1]);
-            setEventType( (DomainEventType)e);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+    String domainEvent;
 
     @Column(nullable = false)
     int domainPartition;
+
+    @Column(nullable = false)
+    String topic;
 
     @Column(nullable = false)
     int topicPartition;
@@ -65,8 +43,39 @@ public class DomainEvent implements Serializable {
     @Nullable
     Long offSet;
 
+    @NonNull
+    @Transient
+    public DomainEventType getDomainEventType() {
+        String[] parts = getDomainEvent().split("@");
+
+        try {
+            Class clz = Class.forName(parts[0]);
+            Object e = Enum.valueOf(clz, parts[1]);
+            return (DomainEventType) e;
+        } catch (Exception e) {
+            throw new RuntimeException("Error building DomainEventType " + getDomainEvent(), e);
+        }
+    }
+
+    public void setDomainEventType(DomainEventType domainEventType) {
+        setDomainEvent(domainEventType.getClass().getName() + "@" + domainEventType.name());
+    }
+
+
     @Transient
     @Nullable
     Map<String, Object> applicationPayload;
+
+
+    @Builder
+    public static DomainEvent newDomainEvent(String key, DomainEventType domainEventType,
+                                             Map<String, Object> applicationPayload) {
+        DomainEvent domainEvent = new DomainEvent();
+        domainEvent.setKey(key);
+        domainEvent.setDomainEventType(domainEventType);
+        domainEvent.setApplicationPayload(applicationPayload);
+
+        return domainEvent;
+    }
 
 }

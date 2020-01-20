@@ -4,8 +4,6 @@ public interface DomainEventType {
 
     String name();
 
-    int topicPartitions();
-
-    String topic();
+    DomainEventTopicInfo topic();
 
 }
