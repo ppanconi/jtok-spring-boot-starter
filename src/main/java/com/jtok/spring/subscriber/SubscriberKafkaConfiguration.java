@@ -77,9 +77,10 @@ public class SubscriberKafkaConfiguration implements ApplicationEventPublisherAw
 
             String eventName = "" + data.get("domain") + "." + data.get("event");
             ExternalDomainEvent externalDomainEvent = ExternalDomainEvent.builder()
-                    .id(data.get("eventId").toString())
-                    .key(data.get("key").toString())
+                    .id(data.getAsString("eventId"))
+                    .key(data.getAsString("key"))
                     .name(eventName)
+                    .refName(data.getAsString("refEvent"))
                     .payload((JSONObject)data.get("payload"))
                     .build();
 

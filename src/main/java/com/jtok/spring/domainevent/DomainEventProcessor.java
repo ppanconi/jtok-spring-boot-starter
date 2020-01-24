@@ -43,6 +43,7 @@ public class DomainEventProcessor {
                     put("event", event.getDomainEventType().name());
                     put("eventId", event.getId());
                     put("key", event.getKey());
+                    put("refEvent", event.getRefEvent());
                     put("payload", event.getApplicationPayload());
                 }}
         ));

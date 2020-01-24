@@ -24,6 +24,10 @@ public class DomainEvent implements Serializable {
     @Column(nullable = false)
     String domainEvent;
 
+    @Column(nullable = true)
+    @Nullable
+    String refEvent;
+
     @Column(nullable = false)
     int domainPartition;
 
@@ -73,6 +77,18 @@ public class DomainEvent implements Serializable {
         DomainEvent domainEvent = new DomainEvent();
         domainEvent.setKey(key);
         domainEvent.setDomainEventType(domainEventType);
+        domainEvent.setApplicationPayload(applicationPayload);
+
+        return domainEvent;
+    }
+
+    @Builder(builderClassName = "BuilderWithRef", builderMethodName = "builderWithRef")
+    public static DomainEvent newDomainEventWithRef(String key, DomainEventType domainEventType, String ref,
+                                             Map<String, Object> applicationPayload) {
+        DomainEvent domainEvent = new DomainEvent();
+        domainEvent.setKey(key);
+        domainEvent.setDomainEventType(domainEventType);
+        domainEvent.setRefEvent(ref);
         domainEvent.setApplicationPayload(applicationPayload);
 
         return domainEvent;

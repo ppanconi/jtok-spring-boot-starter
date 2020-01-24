@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import net.minidev.json.JSONObject;
+import org.springframework.lang.Nullable;
 
 @Data
 @AllArgsConstructor
@@ -17,6 +18,9 @@ public class ExternalDomainEvent {
     private String key;
 
     private String name;
+
+    @Nullable
+    private String refName;
 
     JSONObject payload;
 
