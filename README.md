@@ -19,7 +19,7 @@ Use spring-boot cli to create a new project:
 
 Add spring-jtok dependency to the new created project using jitpack virtual repository :
 
-```
+```groovy
     repositories {
         jcenter()
         maven { url "https://jitpack.io" }
@@ -28,8 +28,16 @@ Add spring-jtok dependency to the new created project using jitpack virtual repo
 
 and add JToK jitpack dependency:
 
+```groovy
+    implementation 'com.github.ppanconi:spring-jtok:master-SNAPSHOT'
 ```
-implementation 'com.github.ppanconi:spring-jtok:master-SNAPSHOT'
+
+JToK uses Spring Kafka at version 2.4.1.RELEASE and kafka client 2.4.0 so make sure
+your project use these versions
+
+```groovy
+    implementation 'org.springframework.kafka:spring-kafka:2.4.1.RELEASE'
+    implementation 'org.apache.kafka:kafka-clients:2.4.0'
 ```
 
 In main configuration enable JToK domain event publisher or/and
@@ -53,5 +61,26 @@ public class DepotApplication {
 
 You have also do add EnableJpaRepositories and EntityScan("\<\<application package\>\>"") annotations.
 
+Configure the application setting properties in application.properties or equivalent files
 
+```properties
+############################################
+# JToK domain events publisher configs
+# application domain name
+jtok.domain.name=depot
+# number of outbox transaction table partitions
+jtok.domain.partitions=3 
+# zookeeper connection string for leader publisher tasks election
+jtok.pub.zookeeperQuorum=localhost:2183,localhost:2182,localhost:2181
+
+############################################
+# JToK external events subscriber configs
+# comma separated topics name to subscribe
+jtok.external.domain.topics=ecommerce.order_created
+
+# spring kafka configurations
+spring.kafka.consumer.bootstrap-servers=localhost:9092,localhost:9093,localhost:9094
+spring.kafka.producer.bootstrap-servers=localhost:9092,localhost:9093,localhost:9094
+
+```
 
