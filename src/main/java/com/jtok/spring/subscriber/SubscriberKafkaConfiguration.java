@@ -67,7 +67,7 @@ public class SubscriberKafkaConfiguration implements ApplicationEventPublisherAw
     }
 
 
-    @KafkaListener(topics = "${jtok.external.domain.topics}")
+    @KafkaListener(topics = "#{'${jtok.external.domain.topics}'.split(',')}")
     public void listen(String message, Acknowledgment acknowledgment) {
 
         try {
