@@ -59,9 +59,9 @@ public class DepotApplication {
 
 ``` 
 
-You have also do add EnableJpaRepositories and EntityScan("\<\<application package\>\>"") annotations.
+You have also to add EnableJpaRepositories and EntityScan("\<\<application package\>\>"") annotations.
 
-Configure the application setting properties in application.properties or equivalent files
+Configure the application setting properties in application.properties or equivalent file
 
 ```properties
 ############################################
@@ -84,3 +84,6 @@ spring.kafka.producer.bootstrap-servers=localhost:9092,localhost:9093,localhost:
 
 ```
 
+#### Publish Events
+
+To publish events from your Agregate 
