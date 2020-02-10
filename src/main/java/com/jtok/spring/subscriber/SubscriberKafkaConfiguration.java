@@ -41,11 +41,13 @@ public class SubscriberKafkaConfiguration implements ApplicationEventPublisherAw
     KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, String>>
         kafkaListenerContainerFactory(ConsumerFactory<String, String> consumerFactory) {
 
-        log.info("Kafka Consumer configs " + consumerFactory.getConfigurationProperties());
+        log.info("Default Kafka Consumer configs " + consumerFactory.getConfigurationProperties());
 
         Map<String, Object> props = new HashMap<>(consumerFactory.getConfigurationProperties());
         props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
         props.put(ConsumerConfig.GROUP_ID_CONFIG, domainName);
+
+        log.info("JTOK Kafka Consumer configs " + consumerFactory.getConfigurationProperties());
 
         ConsumerFactory<String, String> myConsumerFactory = new DefaultKafkaConsumerFactory<>(props,
                 new StringDeserializer(), new StringDeserializer());
