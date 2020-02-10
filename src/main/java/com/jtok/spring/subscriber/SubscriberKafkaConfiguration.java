@@ -55,7 +55,7 @@ public class SubscriberKafkaConfiguration implements ApplicationEventPublisherAw
         factory.setConsumerFactory(myConsumerFactory);
         factory.setConcurrency(3);
         factory.getContainerProperties().setPollTimeout(3000);
-        factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL_IMMEDIATE);
+        factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL);
         factory.getContainerProperties().setGroupId(domainName);
 
         return factory;
