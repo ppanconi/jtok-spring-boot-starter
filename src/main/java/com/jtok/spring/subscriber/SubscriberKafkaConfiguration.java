@@ -88,8 +88,9 @@ public class SubscriberKafkaConfiguration implements ApplicationEventPublisherAw
 
             acknowledgment.acknowledge();
 
-        } catch (ParseException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            log.error("Error during event elaboration " + message + ": " + e.getMessage(), e);
+            throw new RuntimeException(e);
         }
 
 
