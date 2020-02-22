@@ -4,6 +4,7 @@ import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,9 +20,13 @@ import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.config.KafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
 import org.springframework.kafka.listener.ContainerProperties;
+import org.springframework.kafka.listener.DeadLetterPublishingRecoverer;
+import org.springframework.kafka.listener.SeekToCurrentErrorHandler;
 import org.springframework.kafka.support.Acknowledgment;
+import org.springframework.util.backoff.ExponentialBackOff;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -39,15 +44,16 @@ public class SubscriberKafkaConfiguration implements ApplicationEventPublisherAw
 
     @Bean
     KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, String>>
-        kafkaListenerContainerFactory(ConsumerFactory<String, String> consumerFactory) {
+        kafkaListenerContainerFactory(ConsumerFactory<String, String> consumerFactory, KafkaTemplate<String, String> kafkaTemplate) {
 
         log.info("Default Kafka Consumer configs " + consumerFactory.getConfigurationProperties());
 
         Map<String, Object> props = new HashMap<>(consumerFactory.getConfigurationProperties());
         props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
         props.put(ConsumerConfig.GROUP_ID_CONFIG, domainName);
+        props.put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, 60_000); //1 minutes
 
-        log.info("JTOK Kafka Consumer configs " + consumerFactory.getConfigurationProperties());
+        log.info("JTOK Kafka Consumer configs " + props);
 
         ConsumerFactory<String, String> myConsumerFactory = new DefaultKafkaConsumerFactory<>(props,
                 new StringDeserializer(), new StringDeserializer());
@@ -57,8 +63,23 @@ public class SubscriberKafkaConfiguration implements ApplicationEventPublisherAw
         factory.setConsumerFactory(myConsumerFactory);
         factory.setConcurrency(3);
         factory.getContainerProperties().setPollTimeout(3000);
-        factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL);
+        factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL_IMMEDIATE);
         factory.getContainerProperties().setGroupId(domainName);
+        factory.getContainerProperties().setAckOnError(false);
+        ExponentialBackOff backOff = new ExponentialBackOff();
+
+        backOff.setMaxInterval(30000);
+        backOff.setMaxElapsedTime(45000);
+
+        SeekToCurrentErrorHandler errorHandler = new SeekToCurrentErrorHandler(
+                new DeadLetterPublishingRecoverer(kafkaTemplate,
+                        (r, e) -> new TopicPartition(domainName + "." + r.topic() + ".DLT", -1)),
+                backOff
+        );
+
+        errorHandler.setCommitRecovered(true);
+
+        factory.setErrorHandler(errorHandler);
 
         return factory;
     }
