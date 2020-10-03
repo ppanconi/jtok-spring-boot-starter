@@ -14,7 +14,7 @@ JToK issues these events to auto configured Apache Kafka topics.
  - Total transparency to Spring Event Application model 
  - Automatic kafka stuffs creation and configuration, including topics, consumers and producers
  - Embedded partitioned Transactional Outbox Service with automatic distributed consensual balancing
- - Automatic management application event handlers failures with automatic retries and dead letters configuration
+ - Automatic application event handlers failures management with automatic retries and dead letters configuration
 
 ## Getting Started
 Spring-jtok can be used in spring boot jpa application.
