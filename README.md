@@ -2,13 +2,13 @@
 
 ![JToK](jtok.png?raw=true "JToK")
 
-Spring-jtok is Java Spring library to implement Event Driven Microservices. 
+Spring-jtok is a Java Spring library to implement Event Driven Microservices. 
 
 It propagates Spring Domain Events to remote services using Apache Kafka. 
 Spring JPA Domain Entities can emit events using Spring Application Events 
-support and @DomainEvents and @AfterDomainEventPublication annotations 
-(@see also org.springframework.data.domain.AbstractAggregateRoot). 
-JToK public these events to configured Apache Kafka topics.
+support, @DomainEvents and @AfterDomainEventPublication annotations 
+([@see also org.springframework.data.domain.AbstractAggregateRoot](https://docs.spring.io/spring-data/commons/docs/current/api/org/springframework/data/domain/AbstractAggregateRoot.html)). 
+JToK issues these events to auto configured Apache Kafka topics.
 
 ## Getting Started
 Spring-jtok can be used in spring boot jpa application.
@@ -48,7 +48,7 @@ JTok external domain event subscriber:
 @EnableExternalDomainEventSubscriber
 @EnableDomainEventPublisher
 @EnableJpaRepositories
-@EntityScan({"it.plansoft.depot"})
+@EntityScan({"your.application.entity.package"})
 public class DepotApplication {
 
 	public static void main(String[] args) {
@@ -61,7 +61,7 @@ public class DepotApplication {
 
 You have also to add EnableJpaRepositories and EntityScan("\<\<application package\>\>"") annotations.
 
-Configure the application setting properties in application.properties or equivalent file
+Configure application settings properties (application.properties or equivalent file)
 
 ```properties
 ############################################
@@ -70,12 +70,12 @@ Configure the application setting properties in application.properties or equiva
 jtok.domain.name=depot
 # number of outbox transaction table partitions
 jtok.domain.partitions=3 
-# zookeeper connection string for leader publisher tasks election
+# zookeeper connection string, for leader publisher tasks election
 jtok.pub.zookeeperQuorum=localhost:2183,localhost:2182,localhost:2181
 
 ############################################
 # JToK external events subscriber configs
-# comma separated topics name to subscribe
+# comma separated name for topics  to subscribe
 jtok.external.domain.topics=ecommerce.order_created
 
 # spring kafka configurations
@@ -86,4 +86,69 @@ spring.kafka.producer.bootstrap-servers=localhost:9092,localhost:9093,localhost:
 
 #### Publish Events
 
-To publish events from your Agregate 
+To publish events from your Agregate, make your Aggragate root classes extend 
+`org.springframework.data.domain.AbstractAggregateRoot` and your business transactional 
+methods emit events using `registerEvent(event)`
+
+```java
+
+@Entity
+@Table(name = "Accounts")
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class PaymentAccount extends AbstractAggregateRoot {
+
+    ...
+	
+    public int place(List<OperationArticleItem> items) {
+
+	//do your business
+	...
+	registerEvent(DomainEvent.builderWithRef()
+                    .key(refKey)
+                    .domainEventType(PaymentsEvent.PAYMENTS_OPERATION_ADDED)
+                    .ref(refType)
+                    .applicationPayload(new HashMap<String, Object>(){{
+                        put("refKey", refKey);
+                        put("operation", "charge");
+                        put("amount", amount);
+                    }})
+                    .build()
+        );    
+	
+	...
+    }
+    
+    ...
+}
+```
+
+to receive and handle events from external domains use 
+`@org.springframework.context.event.EventListener` 
+annotation on your service transactional business methods
+
+```java
+@Service
+public class AccountService {
+
+    @Transactional
+    @EventListener(condition = "#event.name == 'ecommerce.ORDER_TO_BE_PAYED'")
+    public void handleECommerceOrderCreated(ExternalDomainEvent event) {
+
+        JSONObject payload = event.getPayload();
+        String userId = payload.getAsString("customer");
+        String orderId = payload.getAsString("globalId");
+        Number granTotal = payload.getAsNumber("granTotal");
+
+        BigDecimal charge = new BigDecimal(granTotal.doubleValue()).multiply(new BigDecimal("-1.00"));
+
+	//do charge business
+        int status = addCharge(userId, charge, event.getName(), event.getId(), orderId);
+	
+	...
+   }
+
+}
+
+```
