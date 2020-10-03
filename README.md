@@ -10,6 +10,12 @@ support, @DomainEvents and @AfterDomainEventPublication annotations
 ([@see also org.springframework.data.domain.AbstractAggregateRoot](https://docs.spring.io/spring-data/commons/docs/current/api/org/springframework/data/domain/AbstractAggregateRoot.html)). 
 JToK issues these events to auto configured Apache Kafka topics.
 
+## Features 
+ - Total transparency to Spring Event Application model 
+ - Automatic kafka stuffs creation and configuration, including topics, consumers and producers
+ - Embedded partitioned Transactional Outbox Service with automatic distributed consensual balancing
+ - Automatic management application event handlers failures with automatic retries and dead letters configuration
+
 ## Getting Started
 Spring-jtok can be used in spring boot jpa application.
 
