@@ -3,6 +3,8 @@ package com.jtok.spring.subscriber;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
+import org.apache.kafka.clients.admin.AdminClient;
+import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -20,6 +22,7 @@ import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.config.KafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+import org.springframework.kafka.core.KafkaAdmin;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
 import org.springframework.kafka.listener.ContainerProperties;
@@ -28,8 +31,8 @@ import org.springframework.kafka.listener.SeekToCurrentErrorHandler;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.util.backoff.ExponentialBackOff;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Configuration
 @EnableKafka
@@ -42,9 +45,23 @@ public class SubscriberKafkaConfiguration implements ApplicationEventPublisherAw
     @Value("${jtok.domain.name}")
     String domainName;
 
+    @Value("#{'${jtok.external.domain.topics}'.split(',')}")
+    String[] consumingTopics;
+
     @Bean
     KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, String>>
-        kafkaListenerContainerFactory(ConsumerFactory<String, String> consumerFactory, KafkaTemplate<String, String> kafkaTemplate) {
+        kafkaListenerContainerFactory(ConsumerFactory<String, String> consumerFactory,
+                                      KafkaTemplate<String, String> kafkaTemplate,
+                                      KafkaAdmin kafkaAdmin) {
+
+
+        log.info("Creating Dead Letter topics for consuming topics... ");
+        Collection<NewTopic> newTopics = Arrays.stream(consumingTopics).map(t ->
+                new NewTopic(domainName + "." + t + ".DLT", Optional.empty(), Optional.empty())
+        ).collect(Collectors.toSet());
+        AdminClient admin = AdminClient.create(kafkaAdmin.getConfig());
+        admin.createTopics(newTopics);
+        log.info("Dead Letter topics created");
 
         log.info("Default Kafka Consumer configs " + consumerFactory.getConfigurationProperties());
 
@@ -115,8 +132,6 @@ public class SubscriberKafkaConfiguration implements ApplicationEventPublisherAw
             log.error("Error during event elaboration " + message + ": " + e.getMessage(), e);
             throw new RuntimeException(e);
         }
-
-
     }
 
 }
