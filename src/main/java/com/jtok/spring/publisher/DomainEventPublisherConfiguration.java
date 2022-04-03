@@ -3,17 +3,13 @@ package com.jtok.spring.publisher;
 import com.jtok.spring.domainevent.DomainEventProcessor;
 import com.jtok.spring.domainevent.DomainEventRepository;
 import org.apache.curator.framework.CuratorFramework;
-import org.apache.kafka.clients.admin.NewTopic;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.context.event.EventListener;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.env.Environment;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
@@ -21,8 +17,6 @@ import org.springframework.integration.zookeeper.config.CuratorFrameworkFactoryB
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-import javax.annotation.PostConstruct;
-import java.util.Optional;
 import java.util.UUID;
 
 @Configuration

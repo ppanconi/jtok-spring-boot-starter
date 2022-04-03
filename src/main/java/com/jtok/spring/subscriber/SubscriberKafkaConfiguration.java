@@ -2,7 +2,6 @@ package com.jtok.spring.subscriber;
 
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
-import net.minidev.json.parser.ParseException;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -10,7 +9,6 @@ import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
@@ -59,7 +57,7 @@ public class SubscriberKafkaConfiguration implements ApplicationEventPublisherAw
         Collection<NewTopic> newTopics = Arrays.stream(consumingTopics).map(t ->
                 new NewTopic(domainName + "." + t + ".DLT", Optional.empty(), Optional.empty())
         ).collect(Collectors.toSet());
-        AdminClient admin = AdminClient.create(kafkaAdmin.getConfig());
+        AdminClient admin = AdminClient.create(kafkaAdmin.getConfigurationProperties());
         admin.createTopics(newTopics);
         log.info("Dead Letter topics created");
 
@@ -82,7 +80,6 @@ public class SubscriberKafkaConfiguration implements ApplicationEventPublisherAw
         factory.getContainerProperties().setPollTimeout(3000);
         factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL_IMMEDIATE);
         factory.getContainerProperties().setGroupId(domainName);
-        factory.getContainerProperties().setAckOnError(false);
         ExponentialBackOff backOff = new ExponentialBackOff();
 
         backOff.setMaxInterval(30000);
