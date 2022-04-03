@@ -6,6 +6,7 @@ import com.jtok.spring.domainevent.DomainEventTopicInfo;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -15,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 
-import javax.annotation.PostConstruct;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -24,7 +24,7 @@ import static java.lang.Math.max;
 import static java.lang.Math.min;
 
 @Service
-public class DomainEventPublisherKafka implements DomainEventPublisher {
+public class DomainEventPublisherKafka implements DomainEventPublisher, InitializingBean {
 
     private static final Logger log = LoggerFactory.getLogger(DomainEventPublisherKafka.class);
 
@@ -86,7 +86,6 @@ public class DomainEventPublisherKafka implements DomainEventPublisher {
         }
     }
 
-    @PostConstruct
     public void createTopics() {
 
         DomainEventTypesProvider typesProviders = null;
@@ -123,4 +122,8 @@ public class DomainEventPublisherKafka implements DomainEventPublisher {
         }
     }
 
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        createTopics();
+    }
 }
