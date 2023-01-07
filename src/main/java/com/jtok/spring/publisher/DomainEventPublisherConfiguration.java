@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.env.Environment;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+//import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.integration.zookeeper.config.CuratorFrameworkFactoryBean;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -22,8 +22,8 @@ import java.util.UUID;
 @Configuration
 @EnableConfigurationProperties(DomainConfigs.class)
 @EnableScheduling
-@EntityScan({"com.jtok.spring.domainevent"})
-@EnableJpaRepositories({"com.jtok.spring.domainevent"})
+//@EntityScan({"com.jtok.spring.domainevent"})
+//@EnableJpaRepositories({"com.jtok.spring.domainevent"})
 public class DomainEventPublisherConfiguration {
 
     public static final String ZOOKEEPER_QUORUM = "jtok.pub.zookeeperQuorum";

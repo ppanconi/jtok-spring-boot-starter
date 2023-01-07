@@ -4,51 +4,51 @@ import lombok.*;
 
 import org.springframework.lang.Nullable;
 
-import javax.persistence.*;
+//import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Map;
 
-@Entity
-@Table(name = "Domain_Events")
+//@Entity
+//@Table(name = "Domain_Events")
 @Data
 @NoArgsConstructor
 public class DomainEvent implements Serializable {
 
-    @Id
+//    @Id
     String id;
 
-    @Column(nullable = false)
+//    @Column(nullable = false)
     @NonNull
     String key;
 
-    @Column(nullable = false)
+//    @Column(nullable = false)
     String domainEvent;
 
-    @Column(nullable = true)
+//    @Column(nullable = true)
     @Nullable
     String refEvent;
 
-    @Column(nullable = false)
+//    @Column(nullable = false)
     int domainPartition;
 
-    @Column(nullable = false)
+//    @Column(nullable = false)
     String topic;
 
-    @Column(nullable = false)
+//    @Column(nullable = false)
     int topicPartition;
 
-    @Column(nullable = true, length = 1024)
+//    @Column(nullable = true, length = 1024)
     String eventData;
 
-    @Column(nullable = false)
+//    @Column(nullable = false)
     long eventTsMils;
 
-    @Column(nullable = true)
+//    @Column(nullable = true)
     @Nullable
     Long offSet;
 
     @NonNull
-    @Transient
+//    @Transient
     public DomainEventType getDomainEventType() {
         String[] parts = getDomainEvent().split("@");
 
@@ -66,7 +66,7 @@ public class DomainEvent implements Serializable {
     }
 
 
-    @Transient
+//    @Transient
     @Nullable
     Map<String, Object> applicationPayload;
 
