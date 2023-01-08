@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
@@ -23,18 +22,17 @@ import java.util.concurrent.TimeUnit;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 
-@Service
-public class DomainEventPublisherKafka implements DomainEventPublisher, InitializingBean {
+public abstract class DomainEventPublisherKafkaSupport implements DomainEventPublisher, InitializingBean {
 
-    private static final Logger log = LoggerFactory.getLogger(DomainEventPublisherKafka.class);
+    private static final Logger log = LoggerFactory.getLogger(DomainEventPublisherKafkaSupport.class);
 
     private DomainEventRepository repository;
     private KafkaTemplate<String, String> kafkaTemplate;
     private GenericApplicationContext context;
 
-    public DomainEventPublisherKafka(DomainEventRepository repository,
-                                     KafkaTemplate<String, String> kafkaTemplate,
-                                     GenericApplicationContext context) {
+    public DomainEventPublisherKafkaSupport(DomainEventRepository repository,
+                                            KafkaTemplate<String, String> kafkaTemplate,
+                                            GenericApplicationContext context) {
         this.repository = repository;
         this.kafkaTemplate = kafkaTemplate;
         this.context = context;
@@ -45,7 +43,7 @@ public class DomainEventPublisherKafka implements DomainEventPublisher, Initiali
 
     @Transactional
     public void export(int partition) {
-        Iterable<DomainEvent> events = repository.findByDomainPartitionAndOffSetNullOrderByEventTsMils(partition);
+        List<DomainEvent> events = repository.findByDomainPartitionAndOffSetNullOrderByEventTsMils(partition);
 
         List<CompletableFuture<SendResult<String, String>>> completableFutureList = new ArrayList<>();
 
@@ -61,13 +59,15 @@ public class DomainEventPublisherKafka implements DomainEventPublisher, Initiali
             listenableFuture.addCallback(new ListenableFutureCallback<SendResult<String, String>>() {
                 @Override
                 public void onFailure(Throwable ex) {
-                    throw new RuntimeException("Error sending data to kafka: " + ex.getMessage(), ex);
+//                    throw new RuntimeException("Error sending data to kafka: " + ex.getMessage(), ex);
+                    handlePublishingFailure(ex);
                 }
 
                 @Override
                 public void onSuccess(SendResult<String, String> result) {
                     log.info("delivered event to kafka to offset " + result.getRecordMetadata().offset());
                     event.setOffSet(result.getRecordMetadata().offset());
+                    handlePublishingSuccess(event);
                 }
             });
 
@@ -80,6 +80,9 @@ public class DomainEventPublisherKafka implements DomainEventPublisher, Initiali
         try {
             CompletableFuture.allOf(completableFutureList.toArray(new CompletableFuture[completableFutureList.size()]))
                     .get(30, TimeUnit.SECONDS);
+
+            completePublishing(events);
+
         } catch (Exception e) {
             log.error("Error sending data to kafka " + e.getMessage(), e);
             throw new RuntimeException(e);
@@ -126,4 +129,11 @@ public class DomainEventPublisherKafka implements DomainEventPublisher, Initiali
     public void afterPropertiesSet() throws Exception {
         createTopics();
     }
+
+    abstract void handlePublishingFailure(Throwable ex);
+
+    abstract void handlePublishingSuccess(DomainEvent event);
+
+    abstract void completePublishing(List<DomainEvent> events);
+
 }
