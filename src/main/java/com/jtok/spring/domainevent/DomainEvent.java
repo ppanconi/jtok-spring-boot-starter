@@ -68,7 +68,7 @@ public class DomainEvent implements Serializable {
 
 //    @Transient
     @Nullable
-    Map<String, Object> applicationPayload;
+    private Map<String, Object> applicationPayload;
 
 
     @Builder
